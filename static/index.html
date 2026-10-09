@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aceite Hospedagem | Gestão e Lançamento de Reservas</title>
+  <meta name="description" content="Plataforma de Lançamento e Análise de Reservas Hoteleiras - Aceite Hospedagem">
+  
+  <!-- Fontes Google Inter e Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js para dashboards dinâmicos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Estilos customizados -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- ================= TELA DE LOGIN ================= -->
+  <div id="login-screen" class="login-wrapper">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="login-logo-icon">AH</div>
+        <div>
+          <h1>Aceite <span>Hospedagem</span></h1>
+        </div>
+      </div>
+      <p class="login-subtitle">Acesso seguro à plataforma de gestão de reservas e vendas hoteleiras.</p>
+
+      <div class="quick-profiles">
+        <div class="quick-profiles-title">Acesso Rápido para Demonstração:</div>
+        <div class="profile-pills">
+          <button type="button" class="pill-btn" onclick="fillLoginCredentials('admin', 'admin123')">👑 Administrador</button>
+          <button type="button" class="pill-btn" onclick="fillLoginCredentials('mariaclara', 'vendas123')">💼 Vendedora (Maria Clara)</button>
+          <button type="button" class="pill-btn" onclick="fillLoginCredentials('analista', 'analista123')">📊 Analista de Vendas</button>
+        </div>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" for="login-username">Usuário</label>
+          <input type="text" id="login-username" class="input-box" placeholder="Digite seu usuário..." required autocomplete="username">
+        </div>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label" for="login-password">Senha</label>
+          <input type="password" id="login-password" class="input-box" placeholder="Digite sua senha..." required autocomplete="current-password">
+        </div>
+        <div id="login-error" style="display: none; color: var(--danger); font-size: 0.82rem; margin-bottom: 1rem; background: var(--danger-bg); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--danger-border);"></div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.75rem;">
+          Entrar na Plataforma
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= APLICAÇÃO PRINCIPAL ================= -->
+  <div id="app-container" class="app-container" style="display: none;">
+    <!-- BARRA LATERAL (SIDEBAR) -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon">AH</div>
+        <div class="brand-name">Aceite <span>Hospedagem</span></div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <span class="menu-label">Menu Principal</span>
+        <a class="nav-link active" data-tab="reservations">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+          Lançamentos
+        </a>
+        <a class="nav-link" data-tab="dashboard">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          Dashboard & Vendas
+        </a>
+
+        <span class="menu-label" id="label-admin-section">Administração</span>
+        <a class="nav-link" id="nav-item-users" data-tab="users">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+          Gestão de Usuários
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-info">
+            <div class="user-avatar" id="header-avatar-initial">U</div>
+            <div class="user-details">
+              <span class="user-name" id="header-user-name">Usuário</span>
+              <span class="user-role-badge" id="header-user-role">Vendedor</span>
+            </div>
+          </div>
+          <button class="logout-btn" onclick="logout()" title="Sair da conta">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <main class="main-wrapper">
+      <!-- CABEÇALHO SUPERIOR -->
+      <header class="top-navbar">
+        <div class="page-title-box">
+          <h2 id="page-header-title">Lançamento de Reservas</h2>
+          <p id="page-header-desc">Controle detalhado de reservas hoteleiras, hospedagens e confirmações.</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button id="btn-new-reservation" class="btn btn-primary" onclick="openNewModal()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Novo Lançamento
+          </button>
+        </div>
+      </header>
+
+      <div class="content-body">
+        
+        <!-- SEÇÃO 1: TABELA DE RESERVAS (PLANILHA INTELIGENTE) -->
+        <section id="section-reservations" class="tab-section">
+          <!-- BARRA DE FILTROS -->
+          <div class="filters-bar">
+            <div class="filters-group">
+              <input type="text" id="filter-search" class="input-box" placeholder="Buscar por hóspede ou reserva..." style="width: 250px;">
+              <select id="filter-hotel" class="input-box">
+                <option value="">Todos os Hotéis</option>
+              </select>
+              <select id="filter-empresa" class="input-box">
+                <option value="">Todas as Empresas</option>
+              </select>
+              <select id="filter-baixa" class="input-box">
+                <option value="">Baixa Almaz (Todas)</option>
+                <option value="Baixado">Baixado</option>
+                <option value="Pendente">Pendente</option>
+              </select>
+            </div>
+            <div class="filters-group">
+              <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Período:</span>
+              <input type="date" id="filter-start-date" class="input-box" title="Data Inicial">
+              <input type="date" id="filter-end-date" class="input-box" title="Data Final">
+              <button class="btn btn-outline btn-sm" onclick="document.querySelectorAll('.filters-bar input, .filters-bar select').forEach(i => i.value=''); loadReservations();">Limpar</button>
+            </div>
+          </div>
+
+          <!-- STATUS BAR DA TABELA -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">
+              Exibindo: <strong id="table-count-badge" style="color: var(--text-main);">0 reservas</strong>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">
+              Total Filtrado: <strong id="table-sum-badge" style="color: var(--primary); font-size: 1rem;">R$ 0,00</strong>
+            </div>
+          </div>
+
+          <!-- TABELA ESTILO PLANILHA COM CORES FIÉIS -->
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Cod. Reserva</th>
+                  <th>Hóspede</th>
+                  <th>Data Criação</th>
+                  <th>Checkin</th>
+                  <th>Checkout</th>
+                  <th>Valor</th>
+                  <th>Qtde Hósp.</th>
+                  <th>Hotel</th>
+                  <th>Usuário</th>
+                  <th>Qtde Diária</th>
+                  <th>Empresa</th>
+                  <th>Baixa Almaz</th>
+                  <th style="text-align: right;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="reservations-tbody">
+                <!-- Inserido dinamicamente via Javascript -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- SEÇÃO 2: DASHBOARD COMPLETO DE VENDAS -->
+        <section id="section-dashboard" class="tab-section" style="display: none;">
+          <!-- FILTROS DE DASHBOARD -->
+          <div class="filters-bar" style="margin-bottom: 1.5rem;">
+            <div class="filters-group">
+              <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">Filtrar Análise por Data:</span>
+              <input type="date" id="dash-start-date" class="input-box">
+              <span style="color: var(--text-muted);">até</span>
+              <input type="date" id="dash-end-date" class="input-box">
+              <button class="btn btn-primary btn-sm" onclick="loadDashboardMetrics()">Filtrar Gráficos</button>
+              <button class="btn btn-outline btn-sm" onclick="document.getElementById('dash-start-date').value=''; document.getElementById('dash-end-date').value=''; loadDashboardMetrics();">Todo o Período</button>
+            </div>
+          </div>
+
+          <!-- CARDS DE KPI -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-info">
+                <span>Faturamento Total</span>
+                <div class="kpi-value" id="kpi-total-vendas">R$ 0,00</div>
+                <div class="kpi-sub">Total acumulado de reservas</div>
+              </div>
+              <div class="kpi-icon blue">
+                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-info">
+                <span>Quantidade de Vendas</span>
+                <div class="kpi-value" id="kpi-qtde-reservas">0</div>
+                <div class="kpi-sub">Reservas registradas</div>
+              </div>
+              <div class="kpi-icon green">
+                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-info">
+                <span>Ticket Médio</span>
+                <div class="kpi-value" id="kpi-ticket-medio">R$ 0,00</div>
+                <div class="kpi-sub">Média por reserva</div>
+              </div>
+              <div class="kpi-icon amber">
+                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-info">
+                <span>Diárias & Hóspedes</span>
+                <div class="kpi-value" id="kpi-total-diarias" style="font-size: 1.25rem;">0 diárias</div>
+                <div class="kpi-sub">Capacidade atendida</div>
+              </div>
+              <div class="kpi-icon purple">
+                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- GRÁFICOS ANALÍTICOS -->
+          <div class="charts-grid">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Evolução do Faturamento por Período</h3>
+                  <p class="card-subtitle">Lançamentos diários e tendências de venda</p>
+                </div>
+              </div>
+              <div style="height: 280px;">
+                <canvas id="chart-evolution"></canvas>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Vendas por Hotel</h3>
+                  <p class="card-subtitle">Distribuição da receita entre os hotéis parceiros</p>
+                </div>
+              </div>
+              <div style="height: 280px;">
+                <canvas id="chart-hotel"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="charts-grid">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Performance por Vendedor (Quem Vendeu)</h3>
+                  <p class="card-subtitle">Volume financeiro gerado por cada consultor</p>
+                </div>
+              </div>
+              <div style="height: 280px;">
+                <canvas id="chart-seller"></canvas>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Participação por Empresa</h3>
+                  <p class="card-subtitle">Divisão entre Olímpia, Sunny, Solar e Ômega</p>
+                </div>
+              </div>
+              <div style="height: 280px;">
+                <canvas id="chart-company"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- TABELA DE RESUMO MENSAL E RANKING -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Ranking de Produtividade dos Vendedores</h3>
+              </div>
+              <div id="seller-ranking-list">
+                <!-- Preenchido via Javascript -->
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Consolidado por Mês</h3>
+              </div>
+              <div class="table-responsive">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Mês</th>
+                      <th>Reservas</th>
+                      <th>Total Faturado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="period-summary-tbody">
+                    <!-- Preenchido via Javascript -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SEÇÃO 3: GESTÃO DE USUÁRIOS (ADMIN) -->
+        <section id="section-users" class="tab-section" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div>
+              <h3 style="font-size: 1.1rem; font-weight: 700;">Usuários do Sistema</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Cadastre e controle os níveis de acesso: Administrador, Vendedor e Analista.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openNewUserModal()">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+              Adicionar Usuário
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nome Completo</th>
+                  <th>Usuário</th>
+                  <th>Nível / Perfil</th>
+                  <th>Status</th>
+                  <th>Data Cadastro</th>
+                  <th style="text-align: right;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody">
+                <!-- Preenchido via Javascript -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= MODAL DE LANÇAMENTO / EDIÇÃO DE RESERVA ================= -->
+  <div id="modal-reserva" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-reserva-title">Novo Lançamento de Reserva</h3>
+        <button class="modal-close" onclick="closeModal('modal-reserva')">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <form id="form-reserva">
+        <div class="modal-body">
+          <input type="hidden" id="res-id">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="res-cod">Cód. Reserva <span class="req">*</span></label>
+              <input type="text" id="res-cod" class="input-box" placeholder="Ex: 2042199" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="res-data-criacao">Data de Criação <span class="req">*</span></label>
+              <input type="date" id="res-data-criacao" class="input-box" required>
+            </div>
+
+            <div class="form-group col-span-2">
+              <label class="form-label" for="res-hospede">Nome do Hóspede <span class="req">*</span></label>
+              <input type="text" id="res-hospede" class="input-box" placeholder="Nome completo do hóspede..." required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="res-checkin">Check-in <span class="req">*</span></label>
+              <input type="date" id="res-checkin" class="input-box" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="res-checkout">Check-out <span class="req">*</span></label>
+              <input type="date" id="res-checkout" class="input-box" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="res-valor">Valor Total (R$) <span class="req">*</span></label>
+              <input type="number" step="0.01" id="res-valor" class="input-box" placeholder="0.00" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="res-hospedes">Qtde de Hóspedes <span class="req">*</span></label>
+              <input type="number" min="1" id="res-hospedes" class="input-box" value="2" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="res-diarias">Qtde de Diárias <span class="req">*</span></label>
+              <input type="number" min="1" id="res-diarias" class="input-box" value="3" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="res-hotel">Hotel <span class="req">*</span></label>
+              <select id="res-hotel" class="input-box" required>
+                <option value="">Selecione o hotel...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="res-empresa">Empresa <span class="req">*</span></label>
+              <select id="res-empresa" class="input-box" required>
+                <option value="">Selecione a empresa...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="res-baixa">Baixa Almaz</label>
+              <select id="res-baixa" class="input-box">
+                <option value="Baixado">Baixado</option>
+                <option value="Pendente">Pendente</option>
+              </select>
+            </div>
+
+            <div class="form-group col-span-2" id="group-res-usuario" style="display: none;">
+              <label class="form-label" for="res-usuario">Vendedor Responsável (Admin)</label>
+              <select id="res-usuario" class="input-box">
+                <!-- Preenchido via Javascript se admin -->
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-reserva')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Lançamento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL DE GESTÃO DE USUÁRIO (ADMIN) ================= -->
+  <div id="modal-user" class="modal-overlay">
+    <div class="modal-container" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-user-title">Cadastrar Novo Usuário</h3>
+        <button class="modal-close" onclick="closeModal('modal-user')">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <form id="form-user">
+        <div class="modal-body">
+          <input type="hidden" id="user-id">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="user-name">Nome Completo <span class="req">*</span></label>
+            <input type="text" id="user-name" class="input-box" placeholder="Ex: Maria Clara Silva" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="user-username">Nome de Usuário (Login) <span class="req">*</span></label>
+            <input type="text" id="user-username" class="input-box" placeholder="Ex: mariaclara" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="user-role">Função / Perfil de Acesso <span class="req">*</span></label>
+            <select id="user-role" class="input-box" required>
+              <option value="vendedor">Vendedor (Realiza lançamentos e acompanha produção)</option>
+              <option value="analista">Analista (Apenas visualiza lançamentos e dashboard)</option>
+              <option value="admin">Administrador (Acesso total e gestão de usuários)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="user-password">Senha de Acesso</label>
+            <input type="password" id="user-password" class="input-box" placeholder="Digite uma nova senha...">
+            <span style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">(Deixe em branco na edição para manter a senha atual)</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-user')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Usuário</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CONTAINER DE NOTIFICAÇÕES TOAST -->
+  <div id="toast-container"></div>
+
+  <!-- SCRIPT DA APLICAÇÃO -->
+  <script src="/js/app.js"></script>
+</body>
+</html>
