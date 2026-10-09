@@ -1,0 +1,6 @@
+{
+  "providers": ["python"],
+  "start": {
+    "cmd": "python server.py"
+  }
+}
